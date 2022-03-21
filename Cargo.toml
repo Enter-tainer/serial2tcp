@@ -1,0 +1,12 @@
+[package]
+name = "serial2tcp"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "1.17.0", features = ["full"] }
+tokio-serial = "5.4.2"
+clap = { version = "3.1", features = ["derive", "wrap_help"] }
+anyhow = "1.0.56"
