@@ -48,6 +48,7 @@ async fn main() -> Result<()> {
         }
         Action::Connect { addr, serial_port } => {
             let mut tcp_stream = TcpStream::connect(addr).await?;
+            tcp_stream.set_nodelay(true)?;
             let mut serial_steam = tokio_serial::new(serial_port, 115200).open_native_async()?;
             println!("now connected, start forwarding traffic");
             tokio::io::copy_bidirectional(&mut tcp_stream, &mut serial_steam).await?;
