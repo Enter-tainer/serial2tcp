@@ -1,6 +1,6 @@
 use anyhow::{Ok, Result};
 use clap::Parser;
-use tokio::net::{TcpListener, TcpSocket, TcpStream};
+use tokio::net::{TcpListener, TcpStream};
 use tokio_serial::SerialPortBuilderExt;
 #[derive(Debug, Parser)]
 #[clap(version)]
@@ -36,6 +36,8 @@ enum Action {
         addr: String,
     },
 }
+
+impl Action {}
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Args::parse();
@@ -49,6 +51,7 @@ async fn main() -> Result<()> {
         Action::Connect { addr, serial_port } => {
             let mut tcp_stream = TcpStream::connect(addr).await?;
             tcp_stream.set_nodelay(true)?;
+            tcp_stream.set_linger(None)?;
             let mut serial_steam = tokio_serial::new(serial_port, 115200).open_native_async()?;
             println!("now connected, start forwarding traffic");
             tokio::io::copy_bidirectional(&mut tcp_stream, &mut serial_steam).await?;
@@ -57,6 +60,8 @@ async fn main() -> Result<()> {
             let tcp_listener = TcpListener::bind(addr).await?;
             loop {
                 let (mut socket, addr) = tcp_listener.accept().await?;
+                socket.set_nodelay(true)?;
+                socket.set_linger(None)?;
                 let mut serial_steam =
                     tokio_serial::new(&serial_port, 115200).open_native_async()?;
                 println!("now connected to {:#?}, start forwarding traffic", addr);
